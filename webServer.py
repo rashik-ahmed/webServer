@@ -4,74 +4,53 @@ from socket import *
 import sys
 
 
-
 def webServer(port=13331):
-  serverSocket = socket(AF_INET, SOCK_STREAM)
+    serverSocket = socket(AF_INET, SOCK_STREAM)
   
-  #Prepare a server socket
-  serverSocket.bind(("", port))
+    # Prepare a server socket
+    serverSocket.bind(("", port))
+    serverSocket.listen(1)  # Listening for connections, queue size of 1
   
-  #Fill in start
-
-  #Fill in end
-
-  while True:
-    #Establish the connection
+    while True:
+        # Establish the connection
+        print('Ready to serve...')
+        connectionSocket, addr = serverSocket.accept()  # Accept connection from client
     
-    print('Ready to serve...')
-    connectionSocket, addr = #Fill in start -are you accepting connections?     #Fill in end
+        try:
+            # Receive the request from the client
+            message = connectionSocket.recv(1024).decode()  # Get the client's message and decode it
+            filename = message.split()[1]  # Extract the file requested by the client
+            
+            # Open and read the file requested
+            f = open(filename[1:], 'rb')  # Open the file and read it as bytes
+            
+            # Send response header for a valid request
+            response_header = "HTTP/1.1 200 OK\r\n"
+            response_header += "Content-Type: text/html; charset=UTF-8\r\n"
+            response_header += "Server: Simple-Python-WebServer\r\n"
+            response_header += "\r\n"  # End the headers with a blank line
+
+            connectionSocket.send(response_header.encode())  # Send the headers
+
+            # Send the content of the requested file to the client
+            outputdata = f.read()
+            connectionSocket.send(outputdata)  # Send file content
+            f.close()
+
+            # Close the connection to the client
+            connectionSocket.close()
     
-    try:
-      message = #Fill in start -a client is sending you a message   #Fill in end 
-      filename = message.split()[1]
-      
-      #opens the client requested file. 
-      #Plenty of guidance online on how to open and read a file in python. How should you read it though if you plan on sending it through a socket?
-      f = open(filename[1:], #fill in start #fill in end)
-      #fill in end
-      
+        except IOError:
+            # Send response for a file not found (404 error)
+            response_header = "HTTP/1.1 404 Not Found\r\n"
+            response_header += "Content-Type: text/html\r\n"
+            response_header += "\r\n"
+            response_body = "<html><body><h1>404 Not Found</h1></body></html>"
+            connectionSocket.send(response_header.encode())  # Send the headers
+            connectionSocket.send(response_body.encode())  # Send the 404 HTML response
 
-      #This variable can store the headers you want to send for any valid or invalid request.   What header should be sent for a response that is ok?    
-      #Fill in start 
-              
-      #Content-Type is an example on how to send a header as bytes. There are more!
-      outputdata = b"Content-Type: text/html; charset=UTF-8\r\n"
-
-
-      #Note that a complete header must end with a blank line, creating the four-byte sequence "\r\n\r\n" Refer to https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/csf/html/TCPSockets.html
- 
-      #Fill in end
-               
-      for i in f: #for line in file
-      #Fill in start - append your html file contents #Fill in end 
-        
-      #Send the content of the requested file to the client (don't forget the headers you created)!
-      #Send everything as one send command, do not send one line/item at a time!
-
-      # Fill in start
-
-
-      # Fill in end
-        
-      connectionSocket.close() #closing the connection socket
-      
-    except Exception as e:
-      # Send response message for invalid request due to the file not being found (404)
-      # Remember the format you used in the try: block!
-      #Fill in start
-
-      #Fill in end
-
-
-      #Close client socket
-      #Fill in start
-
-      #Fill in end
-
-  # Commenting out the below (some use it for local testing). It is not required for Gradescope, and some students have moved it erroneously in the While loop. 
-  # DO NOT PLACE ANYWHERE ELSE AND DO NOT UNCOMMENT WHEN SUBMITTING, YOU ARE GONNA HAVE A BAD TIME
-  #serverSocket.close()
-  #sys.exit()  # Terminate the program after sending the corresponding data
+            # Close the connection to the client
+            connectionSocket.close()
 
 if __name__ == "__main__":
-  webServer(13331)
+    webServer(13331)
