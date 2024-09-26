@@ -14,12 +14,12 @@ def webServer(port=13331):
     serverSocket.listen(1)
   
     while True:
-        # Display message indicating the server is ready to accept connections
+        # When the server is prepared to accept connections, display a message.
         print('Ready to serve...')
-        # Accept a connection from a client. This blocks until a connection is received
+        # Accept a client's connection. This stops in the event that a connection is made.
         connectionSocket, addr = serverSocket.accept()  # 'addr' holds the client's address
         try:
-            # Receive the request sent by the client and decode it to string format
+            # After receiving the client's request, decode it into string format.
             try:
                 # Try to receive the data and decode it
                 message = connectionSocket.recv(1024)
@@ -30,20 +30,20 @@ def webServer(port=13331):
             except UnicodeDecodeError:
                 # Handle decoding errors gracefully
                 message = ""
-            # Split the HTTP request message and extract the filename from the second element of the request line
+            # Extract the filename from the second element of the request line by splitting the HTTP request message.
             try:
               request_parts = message.split()
               filename = request_parts[1] if len(request_parts) > 1 else "/"
             except IndexError:
               filename = "/"
-            # Open the requested file from the disk, ignoring the first '/' in the file path, in binary read mode ('rb')
+            # Ignore the first '/' in the file path and open the required file from the disk in binary read mode ('rb').
             f = open(filename[1:], 'rb')
             # Read the entire file content
             outputdata = f.read()
             # Close the file after reading
             f.close()
             
-            # Construct the HTTP response header for a successful file retrieval (200 OK)
+            # Create the HTTP response header (200 OK) in the event that a file retrieval is successful.
             response_header = "HTTP/1.1 200 OK\r\n"
             response_header += "Content-Type: text/html; charset=UTF-8\r\n"  # Specify content type and character encoding
             response_header += "Server: Simple-Python-WebServer\r\n"  # Indicate the server's name
@@ -78,6 +78,6 @@ def webServer(port=13331):
             # Close the connection to the client after sending the error response
             connectionSocket.close()
 
-# If this script is being run directly (not imported), start the web server on the given port
+# If you are running this script directly without importing it, launch the web server on the specified port.
 if __name__ == "__main__":
     webServer(13331)  # Start the server on port 13331
